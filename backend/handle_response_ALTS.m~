@@ -96,9 +96,9 @@ while GetSecs - starttime < ms/1000
         elseif ~hdisplay && trialseq(it, id.nov_h) == 0
 
             if settings.fast_stan == true
-                vibrate_handle(settings.daq, 1, 'both', 'slow'); % start vib
-            else
                 vibrate_handle(settings.daq, 1, 'both', 'fast'); % start vib
+            else
+                vibrate_handle(settings.daq, 1, 'both', 'slow'); % start vib
             end
             
             % set flag to true

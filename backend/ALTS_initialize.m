@@ -2,6 +2,11 @@ function settings = ALTS_initialize(data)
 
 % HANDLES
 settings.daq = DaqDeviceIndex;
+if rand >= .5
+    settings.fast_stan = true;
+else
+    settings.fast_stan = false;
+end
 
 % TRIALS
 if data.training == 0
