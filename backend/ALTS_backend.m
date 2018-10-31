@@ -1,22 +1,39 @@
-function trialseq = ALTS_backend(settings,trialseq)
+function trialseq = ALTS_backend(settings,trialseq,id)
 
 % SHORTCUTS
 FC = settings.layout.color.fixation;
 OW = settings.screen.outwindow;
 owd = settings.screen.outwindowdims;
 
-% COLUMNS
-id = ALT_columns;
-
 % INTRO
 ALTS_intro(settings, trialseq, 1);
+
+% Randomly assign to slow/fast haptic nov
+if rand >= .5; trialseq(:,id.haptic_id) = 1; else trialseq(:,id.haptic_id) = 2;end
 
 % TRIAL LOOP
 for it = 1:size(trialseq,1)
     
     % Buffer Audio
-    if trialseq(it,id.nov_a) == 1; wavdata = settings.sound.novelsounds{1,1}'; else; wavdata = settings.sound.standardsound; end
+    if trialseq(it,id.nov_a) == 1; wavdata = settings.sound.novelsounds{1,1}'; else wavdata = settings.sound.standardsound; end
     PsychPortAudio('FillBuffer', settings.sound.audiohandle, wavdata); % buffer sound
+    
+    % PREP V NOVEL
+    if trialseq(it, id.nov_v) == 1
+        % color
+        r1 = randperm(length(settings.layout.color.options)-1);
+        colors = 2:length(settings.layout.color.options);
+        color = colors(r1(1));
+        % symbol
+        r1 = randperm(9);
+        symbols = 1:9;
+        symbol = symbols(r1(1));
+    else
+        color = 1; % green
+        symbol = 10; % circle
+    end
+    
+    videocue = ALTS_makevisualcue(settings,symbol,color);
     
     % START TIME
     if it == 1; begintime = GetSecs; end
@@ -44,18 +61,10 @@ for it = 1:size(trialseq,1)
     DrawFormattedText(OW, stim, owd(3)/2+side, 'center', settings.layout.color.text);
     stimonset = Screen('Flip', OW);
     
-    % PREP V NOVEL
-    if trialseq(it, id.nov_v) == 1
-        Screen('FillRect', OW, settings.screen.bg_novel);
-        DrawFormattedText(OW, stim, owd(3)/2+side, 'center', settings.layout.color.text);
-        DrawFormattedText(OW, '+', 'center', 'center', FC);
-    else
-        Screen('DrawDots', OW, [owd(3)/2,owd(4)/2], 125, [0 255 0], [], 2);
-        DrawFormattedText(OW, stim, owd(3)/2+side, 'center', settings.layout.color.text);
-    end
+    eval(videocue);
     
     % CHECK FOR RESPONSE
-    [trialseq(it,id.rt), trialseq(it,id.resp)] = handle_response_ALTS(settings.daq,(trialseq(it,id.deadline)+settings.duration.post_deadline)*1000,settings,trialseq,it,OW,stim,owd,side);
+    [trialseq(it,id.rt), trialseq(it,id.resp)] = handle_response_ALTS(settings.daq,(trialseq(it,id.deadline)+settings.duration.post_deadline)*1000,settings,trialseq,id,it,OW,stim,owd,side);
 
     % CODE RESPONSE - (accuracy_legend.m for key)
     if trialseq(it,id.go) == 1

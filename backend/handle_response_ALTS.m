@@ -15,9 +15,7 @@
 %   2: Right handle
 % Needs:
 %   % DaqAInScanJRW, which is the original PTB function, edited for compatibility with R2015a; where bitcmp doesn't work
-function [RT,Resp] = handle_response_ALTS(daq,ms,settings,trialseq,it,OW,stim,owd,side)
-
-id = ALT_columns;
+function [RT,Resp] = handle_response_ALTS(daq,ms,settings,trialseq,id,it,OW,stim,owd,side)
 
 % settings
 DAQoptions.channel = [8 9]; % 8 = single pin A0 (#1), 9 = single pin A1 (#2)
@@ -55,7 +53,7 @@ while GetSecs - starttime < ms/1000
     if GetSecs - starttime >= settings.duration.delay
 
         % if is visual novel
-        if ~vdisplay && trialseq(it, id.nov_v) == 1
+        if ~vdisplay
             
             % flip screen
             Screen('Flip', settings.screen.outwindow);
@@ -70,7 +68,7 @@ while GetSecs - starttime < ms/1000
         end
         
         % if is auditory novel
-        if ~adisplay && trialseq(it, id.nov_a) == 1
+        if ~adisplay
             
             % play audio
             PsychPortAudio('Start', settings.sound.audiohandle, 1, 0, 1);
@@ -81,29 +79,45 @@ while GetSecs - starttime < ms/1000
         end
         
         % if is haptic novel
-        if ~hdisplay && trialseq(it, id.nov_h) == 1
-
-            % vibrate handle
-            if settings.fast_stan == true
-                vibrate_handle(settings.daq, 1, 'both', 'fast'); % start vib
+        if ~hdisplay && trialseq(it, id.haptic_id) == 1
+            
+            if trialseq(it,id.nov_h) == 0
+            
+                % vribrate handle
+                vibrate_handle(settings.daq, 1, 'both', 'both'); % vibration on, vibrate both motors to begin with to account for long ramp-up time for left slow motor
+                WaitSecs(.01); % Wait 10 ms, then turn off fast
+                vibrate_handle(settings.daq, 1, 'both', hapticcue); % now the actual differential vibration slow / fast
+                WaitSecs(settings.duration.vibration - .01);
+                vibrate_handle(settings.daq, 0); % vibration off
+                
             else
-                vibrate_handle(settings.daq, 1, 'both', 'slow'); % start vib
-            end
-
-            % set flag to true
-            hdisplay = true;
-
-        elseif ~hdisplay && trialseq(it, id.nov_h) == 0
-
-            if settings.fast_stan == true
-                vibrate_handle(settings.daq, 1, 'both', 'slow'); % start vib
-            else
+                
                 vibrate_handle(settings.daq, 1, 'both', 'fast'); % start vib
+                
             end
             
             % set flag to true
             hdisplay = true;
-
+            
+        elseif ~hdisplay && trialseq(it,id.haptic_id) == 2
+            
+            if trialseq(it,id.nov_h) == 0
+            
+                vibrate_handle(settings.daq, 1, 'both', 'fast'); % start vib
+                
+            else
+                
+                vibrate_handle(settings.daq, 1, 'both', 'both'); % vibration on, vibrate both motors to begin with to account for long ramp-up time for left slow motor
+                WaitSecs(.01); % Wait 10 ms, then turn off fast
+                vibrate_handle(settings.daq, 1, 'both', hapticcue); % now the actual differential vibration slow / fast
+                WaitSecs(settings.duration.vibration - .01);
+                vibrate_handle(settings.daq, 0); % vibration off
+                
+            end
+            
+            % set flag to true
+            hdisplay = true;
+            
         end
         
     end
@@ -112,7 +126,7 @@ while GetSecs - starttime < ms/1000
     if GetSecs - starttime >= settings.duration.delay + settings.duration.cue
         
         % if is visual novel
-        if ~voffset && trialseq(it, id.nov_v) == 1
+        if ~voffset
             
             % flip screen
             DrawFormattedText(OW, stim, owd(3)/2+side, 'center', settings.layout.color.text);
@@ -124,7 +138,7 @@ while GetSecs - starttime < ms/1000
         end
 
         % if is haptic novel
-        if ~hoffset && trialseq(it, id.nov_h) == 1
+        if ~hoffset
             
             % vribrate off
             vibrate_handle(settings.daq, 0);

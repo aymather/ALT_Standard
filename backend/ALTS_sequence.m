@@ -1,6 +1,5 @@
-function trialseq = ALTS_sequence(settings)
+function trialseq = ALTS_sequence(settings,id)
 
-id = ALT_columns;
 trialseq = [];
 
 % SHORTCUTS

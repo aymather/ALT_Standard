@@ -14,3 +14,4 @@ id.rt = 10;
 id.time = 11;
 id.acc = 12;
 id.deadline = 13;
+id.haptic_id = 14; % 1 == slow_standard; 2 == fast_standard;

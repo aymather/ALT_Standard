@@ -2,11 +2,6 @@ function settings = ALTS_initialize(data)
 
 % HANDLES
 settings.daq = DaqDeviceIndex;
-if rand >= .5
-    settings.fast_stan = true;
-else
-    settings.fast_stan = false;
-end
 
 % TRIALS
 if data.training == 0
@@ -42,6 +37,9 @@ settings.layout.color.cue = [0 255 0];
 settings.layout.color.text = [255 255 255];
 settings.layout.color.diamond = [0 255 0];
 settings.layout.color.SLOW = [255 0 0];
+settings.layout.color.options = [0 255 0; 255 0 0; 0 0 255; 255 255 0; 255 0 255; 0 255 255; ...
+              255 127 0; 127 255 0; 127 0 255; 255 255 127; 255 127 255; 127 255 255; ...  
+              255 0 127; 0 255 127; 0 127 255]; % green = 1
 
 % DURATIONS
 settings.duration.fixation = 1;
@@ -61,6 +59,7 @@ settings.sound.audiohandle = PsychPortAudio('Open', [], [], 0, settings.sound.sr
 load(fullfile(fileparts(which('ALTS.m')), 'backend', 'novelsounds.mat'));
 settings.sound.novelsounds = novelsounds(randperm(length(novelsounds))); % randomize sounds
 asamples = 0:1/settings.sound.srate:settings.sound.duration;
+settings.sound.standardfreq = 600; % 600 hz
 settings.sound.standardsound = sin(2* pi * settings.sound.standardfreq * asamples);
 
 % SCREEN

@@ -18,6 +18,9 @@ Screen('Preference', 'SkipSyncTests', 1);
 % INITIALIZE
 addpath(genpath(fileparts(which('ALTS.m'))));
 
+% Data columns
+id = ALTS_columns;
+
 % DESCRIPTIVES
 data = ALTS_data;
 
@@ -25,10 +28,10 @@ data = ALTS_data;
 settings = ALTS_initialize(data);
 
 % TRIAL SEQUENCE
-trialseq = ALTS_sequence(settings);
+trialseq = ALTS_sequence(settings,id);
 
 % TRIALS
-trialseq = ALTS_backend(settings,trialseq);
+trialseq = ALTS_backend(settings,trialseq,id);
 
 % OUTRO
 ALTS_outro(settings,trialseq,data);
